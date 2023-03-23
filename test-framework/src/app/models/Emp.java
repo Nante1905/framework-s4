@@ -6,7 +6,7 @@ public class Emp {
     int id;
     String name;
 
-    @App(url = "/hey", method = "post")
+    @App(url = "/hey" , method = "get")
     public void sayHey() {
         
     }
