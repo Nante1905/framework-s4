@@ -1,10 +1,12 @@
 package app.models;
 
+import etu1752.framework.decorators.App;
 
 public class Emp {
     int id;
     String name;
 
+    @App(url = "/hey" , method = "get")
     public void sayHey() {
         
     }
