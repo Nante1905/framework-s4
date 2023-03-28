@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Vector;
 
 import etu1752.framework.Mapping;
+import etu1752.framework.view.*;
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -23,7 +25,7 @@ import utils.Utils;
  * FrontServlet
  */
 
-@WebServlet(name = "FrontServlet", urlPatterns = { "/*" })
+@WebServlet(name = "FrontServlet", urlPatterns = { "*.etu", "/" })
 public class FrontServlet extends HttpServlet {
 
     HashMap<String, Mapping> mappingUrls;
@@ -81,11 +83,27 @@ public class FrontServlet extends HttpServlet {
     private void processRequest(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         PrintWriter out = res.getWriter();
         String path = Utils.getUrlPath(req);
-        out.println(path);
+        out.println("path url => " + path);
+        out.println("url debug "+req.getRequestURI());
 
-        out.println(this.mappingUrls.size());
+        // out.println(this.mappingUrls.size());
         for (Map.Entry<String, Mapping> u : this.mappingUrls.entrySet()) {
-            out.println(u.getKey() + " => " + u.getValue().getClassName() + " " + u.getValue().getMethod());
+            // out.println(u.getKey() + " => " + u.getValue().getClassName() + " " + u.getValue().getMethod());
+            if(u.getKey().equals(path)) {
+                try {
+                    Class cls = (Class) Class.forName(u.getValue().getClassName());
+                    Method method = cls.getDeclaredMethod(u.getValue().getMethod());
+
+                    Object o = cls.getConstructor().newInstance();
+
+                    ModelView view = (ModelView) method.invoke(o);
+                    out.print("view =>" +view.getView());
+                    RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/views/"+view.getView());
+                    dispatcher.forward(req, res);
+                } catch (Exception e) {
+                    e.printStackTrace(out);
+                }
+            }
         }
     }
 
