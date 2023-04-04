@@ -97,7 +97,12 @@ public class FrontServlet extends HttpServlet {
                     Object o = cls.getConstructor().newInstance();
 
                     ModelView view = (ModelView) method.invoke(o);
-                    out.print("view =>" +view.getView());
+                    HashMap<String, Object> data = view.getData();
+
+                    for (Map.Entry<String,Object> reqData : data.entrySet()) {
+                        req.setAttribute(reqData.getKey(), reqData.getValue());
+                    }
+
                     RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/views/"+view.getView());
                     dispatcher.forward(req, res);
                 } catch (Exception e) {
