@@ -9,7 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 public class Utils {
     
     public static String getUrlPath(HttpServletRequest req) {
-        return req.getPathInfo();
+        return "/"+req.getRequestURI().split("/")[2];
     }
 
     public static Vector<String> getAllClass(File[] files, Vector<String> result) throws IOException {

@@ -1,14 +1,21 @@
 package app.models;
 
+import java.util.HashMap;
+
 import etu1752.framework.decorators.App;
+import etu1752.framework.view.ModelView;
 
 public class Emp {
     int id;
     String name;
 
-    @App(url = "/hey" , method = "get")
-    public void sayHey() {
+    public Emp() {
         
+    }
+
+    @App(url = "/hey.etu" , method = "get")
+    public ModelView sayHey() {
+        return new ModelView("emp.jsp");
     }
 
     public int getId() {
