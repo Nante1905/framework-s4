@@ -4,16 +4,16 @@ public class Mapping {
     String className;
     String method;
 
-
+    
     public Mapping() {
         
     }
-
+    
     public Mapping(String className, String method) {
         setClassName(className);
         setMethod(method);
     }
-
+    
     public String getClassName() {
         return className;
     }
