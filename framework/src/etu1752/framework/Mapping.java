@@ -3,7 +3,7 @@ package etu1752.framework;
 public class Mapping {
     String className;
     String method;
-
+    Class<?>[] paramsTypes;
     
     public Mapping() {
         
@@ -26,4 +26,12 @@ public class Mapping {
     public void setMethod(String method) {
         this.method = method;
     }
+    public Class<?>[] getParamsTypes() {
+        return paramsTypes;
+    }
+
+    public void setParamsTypes(Class<?>[] paramsTypes) {
+        this.paramsTypes = paramsTypes;
+    }
+    
 }

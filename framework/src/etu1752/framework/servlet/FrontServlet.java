@@ -3,17 +3,20 @@ package etu1752.framework.servlet;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
 import etu1752.framework.Mapping;
+import etu1752.framework.decorators.Params;
 import etu1752.framework.view.*;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
@@ -63,6 +66,7 @@ public class FrontServlet extends HttpServlet {
                 if (m.isAnnotationPresent(etu1752.framework.decorators.App.class)) {
                     etu1752.framework.decorators.App a = m.getAnnotation(etu1752.framework.decorators.App.class);
                     Mapping map = new Mapping(c.getName(), m.getName());
+                    map.setParamsTypes(m.getParameterTypes());
                     urlsMap.put(a.url(), map);
                 }
             }
@@ -88,7 +92,7 @@ public class FrontServlet extends HttpServlet {
             if(u.getKey().equals(path)) {
                 try {
                     Class<?> cls = (Class<?>) Class.forName(u.getValue().getClassName());
-                    Method method = cls.getDeclaredMethod(u.getValue().getMethod());
+                    Method method = cls.getDeclaredMethod(u.getValue().getMethod(), u.getValue().getParamsTypes());
 
                     Object o = cls.getConstructor().newInstance();
 
@@ -99,14 +103,27 @@ public class FrontServlet extends HttpServlet {
                         Method setter = o.getClass().getDeclaredMethod("set"+toCamel(fName), f.getType());
 
                         if(req.getParameter(fName) != null && req.getParameter(fName) != "") {
-                            out.print(req.getParameter(fName));
+                            // out.print(req.getParameter(fName));
                             Object value = Utils.strToObject(req.getParameter(fName), f.getType());
                             setter.invoke(o, value);
                         }
                     }
 
+                    
+                    Parameter[] methodParams = method.getParameters();
+                    Object[] invokationParams = new Object[methodParams.length];
+                    for(Parameter p : methodParams) {
+                        String paramName = p.getAnnotation(Params.class).name();
+                        Enumeration<String> attrNames = req.getParameterNames();
+                        for(int i=0; attrNames.hasMoreElements(); i++) {
+                            if(paramName.equals(attrNames.nextElement())) {
+                                invokationParams[i] = (Utils.strToObject(req.getParameter(paramName), p.getType()));
+                            }
+                        }
+                    }
+                    
 
-                    ModelView view = (ModelView) method.invoke(o);
+                    ModelView view = (ModelView) method.invoke(o, invokationParams);
                     HashMap<String, Object> data = view.getData();
 
                     for (Map.Entry<String,Object> reqData : data.entrySet()) {

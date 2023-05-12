@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import etu1752.framework.decorators.App;
+import etu1752.framework.decorators.Params;
 import etu1752.framework.view.ModelView;
 
 public class Emp {
@@ -73,9 +74,11 @@ public class Emp {
         return view;
     }
 
-    @App(url = "/details", method = "")
-    public ModelView details(int id) {
-        return new ModelView("details.jsp");
+    @App(url = "/details.etu", method = "")
+    public ModelView details(@Params(name = "id") int id) {
+        ModelView view = new ModelView("details.jsp");
+        view.addItem("number", id + 1);
+        return view;
     }
 
     public int getId() {
