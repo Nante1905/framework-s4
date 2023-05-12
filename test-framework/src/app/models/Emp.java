@@ -1,5 +1,7 @@
 package app.models;
 
+import java.sql.Date;
+import java.sql.Time;
 import java.util.HashMap;
 import java.util.Vector;
 
@@ -9,6 +11,28 @@ import etu1752.framework.view.ModelView;
 public class Emp {
     int id;
     String name;
+    Date embauche;
+    Time temps;
+
+    public Time getTemps() {
+        return temps;
+    }
+
+
+    public void setTemps(Time temps) {
+        this.temps = temps;
+    }
+
+
+    public Date getEmbauche() {
+        return embauche;
+    }
+
+
+    public void setEmbauche(Date embauche) {
+        this.embauche = embauche;
+    }
+
 
     public Emp() {
         
@@ -40,12 +64,29 @@ public class Emp {
         return view;
     }
 
+    @App(url = "/add.etu", method = "post")
+    public ModelView insert() {
+        ModelView view = new ModelView("insert.jsp");
+
+        view.addItem("emp", this);
+
+        return view;
+    }
+
+    @App(url = "/details", method = "")
+    public ModelView details(int id) {
+        return new ModelView("details.jsp");
+    }
+
     public int getId() {
         return id;
     }
     public void setId(int id) {
         this.id = id;
     }
+    // public void setId(String id) {
+    //     this.id = Integer.parseInt(id);
+    // }
     public String getName() {
         return name;
     }
