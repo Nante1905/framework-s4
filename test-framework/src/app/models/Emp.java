@@ -8,6 +8,7 @@ import java.util.Vector;
 import etu1752.framework.decorators.App;
 import etu1752.framework.decorators.Params;
 import etu1752.framework.view.ModelView;
+import utils.FileUpload;
 
 public class Emp {
     int id;
@@ -78,6 +79,15 @@ public class Emp {
     public ModelView details(@Params(name = "id") int id) {
         ModelView view = new ModelView("details.jsp");
         view.addItem("number", id + 1);
+        return view;
+    }
+
+    @App(url = "/upload", method = "")
+    public ModelView testUpload(@Params(name = "nante") FileUpload file) {
+        ModelView view = new ModelView("up.jsp");
+
+        view.addItem("fileUp", file.getName());
+
         return view;
     }
 

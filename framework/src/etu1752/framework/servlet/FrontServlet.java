@@ -20,10 +20,13 @@ import etu1752.framework.decorators.Params;
 import etu1752.framework.view.*;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.Part;
+import utils.FileUpload;
 import utils.Utils;
 
 /**
@@ -31,6 +34,11 @@ import utils.Utils;
  */
 
 @WebServlet(name = "FrontServlet", urlPatterns = { "*.etu", "/" })
+
+@MultipartConfig(fileSizeThreshold = 1024 * 1024 * 1, // 1 MB
+maxFileSize = 1024 * 1024 * 10,      // 10 MB
+maxRequestSize = 1024 * 1024 * 100)  // 100 MB)
+
 public class FrontServlet extends HttpServlet {
 
     HashMap<String, Mapping> mappingUrls;
@@ -102,32 +110,62 @@ public class FrontServlet extends HttpServlet {
                         String fName = f.getName();
                         Method setter = o.getClass().getDeclaredMethod("set"+toCamel(fName), f.getType());
 
-                        if(req.getParameter(fName) != null && req.getParameter(fName) != "") {
-                            // out.print(req.getParameter(fName));
-                            Object value = Utils.strToObject(req.getParameter(fName), f.getType());
-                            setter.invoke(o, value);
+                        if(f.getType() == FileUpload.class) {
+                            for(Part part : req.getParts()) {
+                                if(fName.equals(part.getName())) {
+                                    FileUpload file = new FileUpload();
+                                    file.setName(part.getSubmittedFileName());
+                                    file.setBytes(part.getInputStream().readAllBytes());
+
+                                    setter.invoke(o, file);
+                                }
+                            }
+                        } else {
+                            if(req.getParameter(fName) != null && req.getParameter(fName) != "") {
+                                // out.print(req.getParameter(fName));
+                                Object value = Utils.strToObject(req.getParameter(fName), f.getType());
+                                setter.invoke(o, value);
+                            }
                         }
                     }
 
+                    // for(Part part : req.getParts()) {
+                    //     // debug
+                    //     out.println(part.getSubmittedFileName());
+                    // }
                     
                     Parameter[] methodParams = method.getParameters();
                     Object[] invokationParams = new Object[methodParams.length];
+                    int i = 0;
                     for(Parameter p : methodParams) {
                         String paramName = p.getAnnotation(Params.class).name();
                         Enumeration<String> attrNames = req.getParameterNames();
-                        for(int i=0; attrNames.hasMoreElements(); i++) {
+                        while(attrNames.hasMoreElements()) {
                             if(paramName.equals(attrNames.nextElement())) {
                                 invokationParams[i] = (Utils.strToObject(req.getParameter(paramName), p.getType()));
+                                i++;
+                            }
+                        }
+                        for(Part part : req.getParts()) {
+                            if(paramName.equals(part.getName())) {
+                                FileUpload f = new FileUpload();
+                                f.setName(part.getSubmittedFileName());
+                                f.setBytes(part.getInputStream().readAllBytes());
+
+                                invokationParams[i] = f;
+                                i++;
                             }
                         }
                     }
                     
 
                     ModelView view = (ModelView) method.invoke(o, invokationParams);
-                    HashMap<String, Object> data = view.getData();
+                    if(view != null) {
+                        HashMap<String, Object> data = view.getData();
 
-                    for (Map.Entry<String,Object> reqData : data.entrySet()) {
-                        req.setAttribute(reqData.getKey(), reqData.getValue());
+                        for (Map.Entry<String,Object> reqData : data.entrySet()) {
+                            req.setAttribute(reqData.getKey(), reqData.getValue());
+                        }
                     }
 
                     RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/views/"+view.getView());
