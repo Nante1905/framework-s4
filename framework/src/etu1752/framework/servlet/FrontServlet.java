@@ -33,12 +33,12 @@ import utils.Utils;
  * FrontServlet
  */
 
-@WebServlet(name = "FrontServlet", urlPatterns = { "*.etu", "/" })
 
 @MultipartConfig(fileSizeThreshold = 1024 * 1024 * 1, // 1 MB
 maxFileSize = 1024 * 1024 * 10,      // 10 MB
 maxRequestSize = 1024 * 1024 * 100)  // 100 MB)
 
+@WebServlet(name = "FrontServlet", urlPatterns = { "*.etu", "/" })
 public class FrontServlet extends HttpServlet {
 
     HashMap<String, Mapping> mappingUrls;
@@ -146,14 +146,16 @@ public class FrontServlet extends HttpServlet {
                                 i++;
                             }
                         }
-                        for(Part part : req.getParts()) {
-                            if(paramName.equals(part.getName())) {
-                                FileUpload f = new FileUpload();
-                                f.setName(part.getSubmittedFileName());
-                                f.setBytes(part.getInputStream().readAllBytes());
-
-                                invokationParams[i] = f;
-                                i++;
+                        if(p.getType() == FileUpload.class) {
+                            for(Part part : req.getParts()) {
+                                if(paramName.equals(part.getName())) {
+                                    FileUpload f = new FileUpload();
+                                    f.setName(part.getSubmittedFileName());
+                                    f.setBytes(part.getInputStream().readAllBytes());
+    
+                                    invokationParams[i] = f;
+                                    i++;
+                                }
                             }
                         }
                     }
