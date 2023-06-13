@@ -7,14 +7,18 @@ import java.util.Vector;
 
 import etu1752.framework.decorators.App;
 import etu1752.framework.decorators.Params;
+import etu1752.framework.decorators.Scope;
 import etu1752.framework.view.ModelView;
 import utils.FileUpload;
 
+@Scope()
 public class Emp {
     int id;
     String name;
     Date embauche;
     Time temps;
+    int count;
+    FileUpload f;
 
     public Time getTemps() {
         return temps;
@@ -91,6 +95,21 @@ public class Emp {
         return view;
     }
 
+    @App(url = "/count.etu", method = "")
+    public ModelView count() {
+        ModelView view = new ModelView("count.jsp");
+        view.addItem("count", this.count);
+        return view;
+    }
+
+    @App(url = "/addcount.etu", method = "")
+    public ModelView addCount(@Params(name = "number") int number) {
+        ModelView view = new ModelView("count.jsp");
+        this.count += number;
+        view.addItem("count", this.count);
+        return view;
+    }
+
     public int getId() {
         return id;
     }
@@ -106,4 +125,26 @@ public class Emp {
     public void setName(String name) {
         this.name = name;
     }
+
+
+    public int getCount() {
+        return count;
+    }
+
+
+    public void setCount(int count) {
+        this.count = count;
+    }
+
+
+    public FileUpload getF() {
+        return f;
+    }
+
+
+    public void setF(FileUpload f) {
+        this.f = f;
+    }
+    
+    
 }
