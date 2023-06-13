@@ -1,0 +1,1 @@
+<p> <%= request.getAttribute("count") %> </p>

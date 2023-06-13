@@ -17,6 +17,7 @@ import java.util.Vector;
 
 import etu1752.framework.Mapping;
 import etu1752.framework.decorators.Params;
+import etu1752.framework.decorators.Scope;
 import etu1752.framework.view.*;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
@@ -42,12 +43,14 @@ maxRequestSize = 1024 * 1024 * 100)  // 100 MB)
 public class FrontServlet extends HttpServlet {
 
     HashMap<String, Mapping> mappingUrls;
+    HashMap<String, Object> singletons;
 
     @Override
     public void init() throws ServletException {
         super.init();
         try {
             this.mappingUrls = new HashMap<>();
+            this.singletons = new HashMap<>();
             this.initialize(this.mappingUrls);
         } catch (ClassNotFoundException | IOException e) {
             
@@ -69,6 +72,10 @@ public class FrontServlet extends HttpServlet {
         }
         
         for (Class<?> c : cls) {
+            if(c.isAnnotationPresent(Scope.class)) {
+                singletons.put(c.getName(), null);
+            }
+
             Method[] methods = c.getDeclaredMethods();
             for (Method m : methods) {
                 if (m.isAnnotationPresent(etu1752.framework.decorators.App.class)) {
@@ -102,25 +109,41 @@ public class FrontServlet extends HttpServlet {
                     Class<?> cls = (Class<?>) Class.forName(u.getValue().getClassName());
                     Method method = cls.getDeclaredMethod(u.getValue().getMethod(), u.getValue().getParamsTypes());
 
-                    Object o = cls.getConstructor().newInstance();
+                    Object o = null;
 
+                    if(this.singletons.containsKey(cls.getName())) {
+                        if(this.singletons.get(cls.getName()) == null) {
+                            o = cls.getConstructor().newInstance();
+                            this.singletons.put(cls.getName(), o);
+                        } else {
+                            o = this.singletons.get(cls.getName());
+                        }
+                    }
+
+                    if(o == null) {
+                        o = cls.getConstructor().newInstance();
+                    }
                     
                     Field[] fields = o.getClass().getDeclaredFields();
                     for(Field f : fields) {
                         String fName = f.getName();
                         Method setter = o.getClass().getDeclaredMethod("set"+toCamel(fName), f.getType());
 
-                        if(f.getType() == FileUpload.class) {
-                            for(Part part : req.getParts()) {
-                                if(fName.equals(part.getName())) {
-                                    FileUpload file = new FileUpload();
-                                    file.setName(part.getSubmittedFileName());
-                                    file.setBytes(part.getInputStream().readAllBytes());
 
-                                    setter.invoke(o, file);
+                        if(req.getContentType() != null && req.getContentType().startsWith("multipart/")) {
+                            if(f.getType() == FileUpload.class) {
+                                for(Part part : req.getParts()) {
+                                    if(fName.equals(part.getName())) {
+                                        FileUpload file = new FileUpload();
+                                        file.setName(part.getSubmittedFileName());
+                                        file.setBytes(part.getInputStream().readAllBytes());
+    
+                                        setter.invoke(o, file);
+                                    }
                                 }
-                            }
-                        } else {
+                            } 
+                        }
+                        else {
                             if(req.getParameter(fName) != null && req.getParameter(fName) != "") {
                                 // out.print(req.getParameter(fName));
                                 Object value = Utils.strToObject(req.getParameter(fName), f.getType());

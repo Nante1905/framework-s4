@@ -5,6 +5,7 @@ import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
@@ -65,5 +66,19 @@ public class Utils {
         else {
             throw new Exception("Type not supported exception");
         }
+    }
+
+    public static void toDefault(Object o) {
+        Field[] fields = o.getClass().getDeclaredFields();
+        // try {
+        //     for(Field f : fields) {
+        //         f.setAccessible(true);
+        //         if(f.getType() == int.class || f.getType() == float.class || f.getType() == double.class || f.getType()) {
+        //             f.set(o, 0);
+        //         }
+        //     }
+        // } catch (Exception e) {
+        //     e.printStackTrace();
+        // }
     }
 }
