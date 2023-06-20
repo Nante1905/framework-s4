@@ -10,6 +10,8 @@ copy .\*.jsp %path%
 
 copy .\WEB-INF\lib %path%\WEB-INF\lib
 
+copy .\WEB-INF\web.xml %path%\WEB-INF
+
 "c:\Windows\System32\xcopy.exe" /s .\WEB-INF\classes %path%\WEB-INF\classes
 
 cd %path%

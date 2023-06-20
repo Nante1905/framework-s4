@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.Vector;
 
 import etu1752.framework.decorators.App;
+import etu1752.framework.decorators.Auth;
 import etu1752.framework.decorators.Params;
 import etu1752.framework.decorators.Scope;
 import etu1752.framework.view.ModelView;
@@ -108,6 +109,26 @@ public class Emp {
         this.count += number;
         view.addItem("count", this.count);
         return view;
+    }
+
+    @App(url = "/login.etu", method = "")
+    public ModelView login(@Params(name = "nom") String nom) {
+        ModelView view = new ModelView("logged.jsp");
+        view.addSession("isconnected", nom);
+        view.addItem("session", nom);
+        return view;
+    }
+
+    @App(url = "/nante.etu", method = "")
+    @Auth(profile = "nante")
+    public ModelView nante() {
+        return new ModelView("nante.jsp");
+    }
+
+    @App(url = "/public.etu", method = "")
+    @Auth(profile = "")
+    public ModelView all() {
+        return new ModelView("public.jsp");
     }
 
     public int getId() {
