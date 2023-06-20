@@ -19,6 +19,7 @@ import etu1752.framework.Mapping;
 import etu1752.framework.decorators.Auth;
 import etu1752.framework.decorators.Params;
 import etu1752.framework.decorators.Scope;
+import etu1752.framework.decorators.Session;
 import etu1752.framework.view.*;
 import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletException;
@@ -126,6 +127,8 @@ public class FrontServlet extends HttpServlet {
                         o = cls.getConstructor().newInstance();
                     }
                     
+                    // data binding fields
+
                     Field[] fields = o.getClass().getDeclaredFields();
                     for(Field f : fields) {
                         String fName = f.getName();
@@ -159,6 +162,8 @@ public class FrontServlet extends HttpServlet {
                     //     out.println(part.getSubmittedFileName());
                     // }
                     
+                    // data binding parameters
+
                     Parameter[] methodParams = method.getParameters();
                     Object[] invokationParams = new Object[methodParams.length];
                     int i = 0;
@@ -184,7 +189,23 @@ public class FrontServlet extends HttpServlet {
                             }
                         }
                     }
+
+                    // session binding
                     
+                    if(method.isAnnotationPresent(Session.class)) {
+                        Field sessionField = o.getClass().getDeclaredField("sessions");
+                        sessionField.setAccessible(true);
+                        HashMap<String, Object> sessions = (HashMap<String, Object>)sessionField.get(o);
+
+                        Enumeration<String> names = req.getSession().getAttributeNames();
+                        while(names.hasMoreElements()) {
+                            String sessionName = names.nextElement();
+                            Object sessionObject = req.getSession().getAttribute(sessionName);
+                            sessions.put(sessionName, sessionObject);
+                        }
+                    }
+
+                    // auth
 
                     ModelView view = null;
 
@@ -225,6 +246,22 @@ public class FrontServlet extends HttpServlet {
                         for(Map.Entry<String, String> session : sessions.entrySet()) {
                             req.getSession().setAttribute(session.getKey(), session.getValue());
                         }
+                    }
+
+                    // session binding
+                    
+                    out.println(method.isAnnotationPresent(Session.class));
+                    if(method.isAnnotationPresent(Session.class)) {
+                        Field sessionField = o.getClass().getDeclaredField("sessions");
+                        sessionField.setAccessible(true);
+                        HashMap<String, Object> sessions = (HashMap<String, Object>)sessionField.get(o);
+                        
+                        for(Map.Entry<String, Object> s : sessions.entrySet()) {
+                            req.getSession().setAttribute(s.getKey(), s.getValue());
+                        }
+
+                        out.println(req.getSession().getAttribute("nantesession"));
+
                     }
 
                     RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/views/"+view.getView());

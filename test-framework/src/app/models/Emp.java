@@ -9,10 +9,11 @@ import etu1752.framework.decorators.App;
 import etu1752.framework.decorators.Auth;
 import etu1752.framework.decorators.Params;
 import etu1752.framework.decorators.Scope;
+import etu1752.framework.decorators.Session;
 import etu1752.framework.view.ModelView;
 import utils.FileUpload;
 
-@Scope()
+
 public class Emp {
     int id;
     String name;
@@ -20,6 +21,7 @@ public class Emp {
     Time temps;
     int count;
     FileUpload f;
+    HashMap<String, Object> sessions;
 
     public Time getTemps() {
         return temps;
@@ -42,7 +44,7 @@ public class Emp {
 
 
     public Emp() {
-        
+        this.sessions = new HashMap<>();
     }
     
 
@@ -52,7 +54,7 @@ public class Emp {
     }
 
 
-    @App(url = "/hey.etu" , method = "get")
+    @App(url = "/hey.etu")
     public ModelView sayHey() {
         ModelView view = new ModelView("emp.jsp");
 
@@ -71,7 +73,7 @@ public class Emp {
         return view;
     }
 
-    @App(url = "/add.etu", method = "post")
+    @App(url = "/add.etu")
     public ModelView insert() {
         ModelView view = new ModelView("insert.jsp");
 
@@ -80,14 +82,14 @@ public class Emp {
         return view;
     }
 
-    @App(url = "/details.etu", method = "")
+    @App(url = "/details.etu")
     public ModelView details(@Params(name = "id") int id) {
         ModelView view = new ModelView("details.jsp");
         view.addItem("number", id + 1);
         return view;
     }
 
-    @App(url = "/upload", method = "")
+    @App(url = "/upload")
     public ModelView testUpload(@Params(name = "nante") FileUpload file) {
         ModelView view = new ModelView("up.jsp");
 
@@ -96,14 +98,14 @@ public class Emp {
         return view;
     }
 
-    @App(url = "/count.etu", method = "")
+    @App(url = "/count.etu")
     public ModelView count() {
         ModelView view = new ModelView("count.jsp");
         view.addItem("count", this.count);
         return view;
     }
 
-    @App(url = "/addcount.etu", method = "")
+    @App(url = "/addcount.etu")
     public ModelView addCount(@Params(name = "number") int number) {
         ModelView view = new ModelView("count.jsp");
         this.count += number;
@@ -111,7 +113,7 @@ public class Emp {
         return view;
     }
 
-    @App(url = "/login.etu", method = "")
+    @App(url = "/login.etu")
     public ModelView login(@Params(name = "nom") String nom) {
         ModelView view = new ModelView("logged.jsp");
         view.addSession("isconnected", nom);
@@ -119,16 +121,33 @@ public class Emp {
         return view;
     }
 
-    @App(url = "/nante.etu", method = "")
+    @App(url = "/nante.etu")
     @Auth(profile = "nante")
     public ModelView nante() {
         return new ModelView("nante.jsp");
     }
 
-    @App(url = "/public.etu", method = "")
+    @App(url = "/public.etu")
     @Auth(profile = "")
     public ModelView all() {
         return new ModelView("public.jsp");
+    }
+
+    @App(url = "/sessionadd.etu")
+    @Session
+    public ModelView addSession(@Params(name = "value") String value) {
+        ModelView view = new ModelView("nante.jsp");
+        this.sessions.put("nantesession", value);
+        view.addItem("value", value);
+        return view;
+    }
+
+    @App(url = "/showsession.etu")
+    @Session
+    public ModelView showSession() {
+        ModelView view = new ModelView("session.jsp");
+        view.addItem("session", this.sessions.get("nantesession"));
+        return view;
     }
 
     public int getId() {
@@ -165,6 +184,16 @@ public class Emp {
 
     public void setF(FileUpload f) {
         this.f = f;
+    }
+
+
+    public HashMap<String, Object> getSessions() {
+        return sessions;
+    }
+
+
+    public void setSessions(HashMap<String, Object> sessions) {
+        this.sessions = sessions;
     }
     
     
