@@ -1,0 +1,1 @@
+<p>Logged as <%= request.getAttribute("session") %></p>
