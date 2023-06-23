@@ -152,10 +152,10 @@ public class Emp {
     }
 
     @App(url = "/api.etu")
-    @Json
     public ModelView hello() {
         ModelView view = new ModelView();
         view.addItem("message", "Hello world");
+        view.setJson(true);
         return view;
     }
 

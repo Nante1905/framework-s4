@@ -19,7 +19,6 @@ import com.google.gson.Gson;
 
 import etu1752.framework.Mapping;
 import etu1752.framework.decorators.Auth;
-import etu1752.framework.decorators.Json;
 import etu1752.framework.decorators.Params;
 import etu1752.framework.decorators.Scope;
 import etu1752.framework.decorators.Session;
@@ -270,7 +269,7 @@ public class FrontServlet extends HttpServlet {
 
                     }
 
-                    if(method.isAnnotationPresent(Json.class)) {
+                    if(view.isJson()) {
                         Gson json = new Gson();
                         String data = json.toJson(view.getData());
                         res.setContentType("application/json");
