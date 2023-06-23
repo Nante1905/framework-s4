@@ -7,6 +7,7 @@ import java.util.Vector;
 
 import etu1752.framework.decorators.App;
 import etu1752.framework.decorators.Auth;
+import etu1752.framework.decorators.Json;
 import etu1752.framework.decorators.Params;
 import etu1752.framework.decorators.Scope;
 import etu1752.framework.decorators.Session;
@@ -147,6 +148,14 @@ public class Emp {
     public ModelView showSession() {
         ModelView view = new ModelView("session.jsp");
         view.addItem("session", this.sessions.get("nantesession"));
+        return view;
+    }
+
+    @App(url = "/api.etu")
+    @Json
+    public ModelView hello() {
+        ModelView view = new ModelView();
+        view.addItem("message", "Hello world");
         return view;
     }
 
