@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Vector;
 
+import com.google.gson.Gson;
+
 import etu1752.framework.Mapping;
 import etu1752.framework.decorators.Auth;
 import etu1752.framework.decorators.Params;
@@ -98,8 +100,10 @@ public class FrontServlet extends HttpServlet {
     private void processRequest(HttpServletRequest req, HttpServletResponse res) throws ServletException, IOException {
         PrintWriter out = res.getWriter();
         String path = Utils.getUrlPath(req);
-        out.println("path url => " + path);
-        out.println("url debug "+req.getRequestURI());
+        
+        // debug
+        // out.println("path url => " + path);
+        // out.println("url debug "+req.getRequestURI());
         
         for (Map.Entry<String, Mapping> u : this.mappingUrls.entrySet()) {
             // debug
@@ -250,7 +254,8 @@ public class FrontServlet extends HttpServlet {
 
                     // session binding
                     
-                    out.println(method.isAnnotationPresent(Session.class));
+                    // debug
+                    // out.println(method.isAnnotationPresent(Session.class));
                     if(method.isAnnotationPresent(Session.class)) {
                         Field sessionField = o.getClass().getDeclaredField("sessions");
                         sessionField.setAccessible(true);
@@ -259,13 +264,22 @@ public class FrontServlet extends HttpServlet {
                         for(Map.Entry<String, Object> s : sessions.entrySet()) {
                             req.getSession().setAttribute(s.getKey(), s.getValue());
                         }
-
-                        out.println(req.getSession().getAttribute("nantesession"));
+                        // debug
+                        // out.println(req.getSession().getAttribute("nantesession"));
 
                     }
 
-                    RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/views/"+view.getView());
-                    dispatcher.forward(req, res);
+                    if(view.isJson()) {
+                        Gson json = new Gson();
+                        String data = json.toJson(view.getData());
+                        res.setContentType("application/json");
+                        out.print(data);
+                    }
+                    else {
+                        RequestDispatcher dispatcher = getServletContext().getRequestDispatcher("/views/"+view.getView());
+                        dispatcher.forward(req, res);
+                    }
+
                 } catch (Exception e) {
                     e.printStackTrace(out);
                 }
