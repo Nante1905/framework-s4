@@ -16,6 +16,7 @@ import java.util.Map;
 import java.util.Vector;
 
 import etu1752.framework.Mapping;
+import etu1752.framework.decorators.Auth;
 import etu1752.framework.decorators.Params;
 import etu1752.framework.decorators.Scope;
 import etu1752.framework.view.*;
@@ -26,6 +27,7 @@ import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
 import jakarta.servlet.http.Part;
 import utils.FileUpload;
 import utils.Utils;
@@ -184,12 +186,44 @@ public class FrontServlet extends HttpServlet {
                     }
                     
 
-                    ModelView view = (ModelView) method.invoke(o, invokationParams);
+                    ModelView view = null;
+
+                    if(method.isAnnotationPresent(Auth.class)) {
+                        HttpSession servletSession = req.getSession();
+                        String authProfile = method.getAnnotation(Auth.class).profile();
+                        String sessionKey = this.getInitParameter("sessionname");
+                        
+                        String currentUser = (String) servletSession.getAttribute(sessionKey);
+                        if(currentUser == null) {
+                            throw new ServletException("Invalid session");
+                        }
+                        else {
+                            if(currentUser.equals(authProfile)) {
+                                view = (ModelView) method.invoke(o, invokationParams);
+                            }
+                            else if(currentUser.equals(authProfile) == false && authProfile.equals("")) {
+                                view = (ModelView) method.invoke(o, invokationParams);
+                            }
+                            else if(currentUser.equals(authProfile) == false && authProfile.equals("") == false) {
+                                throw new ServletException("Invalid session");
+                            }
+                        }
+                    }
+
+                    else if(method.isAnnotationPresent(Auth.class) == false) {
+                        view = (ModelView) method.invoke(o, invokationParams);
+                    }
+
                     if(view != null) {
                         HashMap<String, Object> data = view.getData();
 
                         for (Map.Entry<String,Object> reqData : data.entrySet()) {
                             req.setAttribute(reqData.getKey(), reqData.getValue());
+                        }
+
+                        HashMap<String, String> sessions = view.getSessions();
+                        for(Map.Entry<String, String> session : sessions.entrySet()) {
+                            req.getSession().setAttribute(session.getKey(), session.getValue());
                         }
                     }
 
