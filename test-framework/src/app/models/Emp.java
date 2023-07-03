@@ -5,9 +5,9 @@ import java.sql.Time;
 import java.util.HashMap;
 import java.util.Vector;
 
+import etu1752.framework.decorators.Api;
 import etu1752.framework.decorators.App;
 import etu1752.framework.decorators.Auth;
-import etu1752.framework.decorators.Json;
 import etu1752.framework.decorators.Params;
 import etu1752.framework.decorators.Scope;
 import etu1752.framework.decorators.Session;
@@ -157,6 +157,21 @@ public class Emp {
         view.addItem("message", "Hello world");
         view.setJson(true);
         return view;
+    }
+
+    @App(url = "/emps.etu")
+    @Api
+    public Vector<Emp> findAllEmps() {
+        Vector<Emp> emps = new Vector<>();
+        Emp e1 = new Emp(1, "Jean");
+        Emp e2 = new Emp(2, "Jak");
+        Emp e3 = new Emp(3, "Haha");
+
+        emps.add(e1);
+        emps.add(e2);
+        emps.add(e3);
+
+        return emps;
     }
 
     public int getId() {
