@@ -151,6 +151,22 @@ public class Emp {
         return view;
     }
 
+    @App(url = "/deconnect.etu")
+    public ModelView deconnect() {
+        ModelView view = new ModelView("deco.jsp");
+        view.setInvalidateSession(true);
+
+        return view;
+    }
+
+    @App(url = "/deconnectuser.etu")
+    public ModelView deconnect(@Params(name = "session") String deco) {
+        ModelView view = new ModelView("deco.jsp");
+        view.addDeleteSession(deco);
+
+        return view;
+    }
+
     @App(url = "/api.etu")
     public ModelView hello() {
         ModelView view = new ModelView();
