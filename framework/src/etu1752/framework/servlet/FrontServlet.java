@@ -265,6 +265,21 @@ public class FrontServlet extends HttpServlet {
 
                         }
 
+
+                        // delete session
+                        if(view.isInvalidateSession()) {
+                            req.getSession().invalidate();
+                        }
+
+                        Field sessionField = o.getClass().getDeclaredField("sessions");
+                        sessionField.setAccessible(true);
+                        HashMap<String, Object> sessions = (HashMap<String, Object>) sessionField.get(o);
+
+                        for(String toDelete : view.getDeleteSession()) {
+                            req.getSession().removeAttribute(toDelete);
+                            sessions.remove(toDelete);
+                        }
+
                         if (view.isJson()) {
                             Gson json = new Gson();
                             String data = json.toJson(view.getData());

@@ -1,21 +1,26 @@
 package etu1752.framework.view;
 
 import java.util.HashMap;
+import java.util.Vector;
 
 public class ModelView {
     String view;
     HashMap<String, Object> data;
     HashMap<String, String> sessions;
     boolean isJson;
+    boolean invalidateSession;
+    Vector<String> deleteSession;
 
     public ModelView() {
         this.data = new HashMap<String, Object>();
         this.sessions = new HashMap<String, String>();
+        this.deleteSession = new Vector<String>();
     }
     public ModelView(String view) {
         this.view = view;
         this.data = new HashMap<String, Object>();
         this.sessions = new HashMap<String, String>();
+        this.deleteSession = new Vector<String>();
     }
     
     public String getView() {
@@ -53,4 +58,17 @@ public class ModelView {
     public void setJson(boolean isJson) {
         this.isJson = isJson;
     }
+    public boolean isInvalidateSession() {
+        return invalidateSession;
+    }
+    public void setInvalidateSession(boolean invalidateSession) {
+        this.invalidateSession = invalidateSession;
+    }
+    public Vector<String> getDeleteSession() {
+        return deleteSession;
+    }
+    public void addDeleteSession(String value) {
+        this.deleteSession.add(value);
+    }
+    
 }
