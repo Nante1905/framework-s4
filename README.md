@@ -9,12 +9,23 @@ Ajouter une declaration de servlet dans votre web.xml
 - servlet-class : etu1752.framework.servlet.FrontServlet
 - url-mapping : *.etu
 
+```xml
+<servlet>
+    <servlet-name>FrontServlet</servlet-name>
+    <servlet-class>etu1752.framework.servlet.FrontServlet</servlet-class>
+</servlet>
+<servlet-mapping>
+    <servlet-name>FrontServlet</servlet-name>
+    <url-pattern>*.etu</url-pattern>
+</servlet-mapping>
+```
+
 Vous pouver maintenant annoter vos fonctions dans vos class model :
 - Annotation : etu1752.framework.decorators.App
 - annotation parameters : url :string, method :string
 - <strong>ATTENTION</strong> : toute url pour l'annotation doit commencer par ce modele => /votre-url.etu
 ```java
-@App(url = "/hello.etu", method = "")
+@App(url = "/hello.etu")
 public void hello() {
     // process ...
 }
@@ -26,7 +37,7 @@ Mettez les views que vous retourner dans un repertoire nommé "views" au meme ni
 Les views sont en .jsp. <br>
 Exemple : 
 ```java
-@App(url = "/details", method = "")
+@App(url = "/details")
 public ModelView details() {
     // some code ...
     return new ModelView("details.jsp");
@@ -37,7 +48,7 @@ L'objet de type ModelView possede une methode addItem(key :string, value :Object
 
 ### Emp.java
 ```java
-@App(url = "/hey.etu" , method = "get")
+@App(url = "/hey.etu")
 public ModelView sayHey() {
     ModelView view = new ModelView("emp.jsp");
 
@@ -89,7 +100,7 @@ Pour utiliser les données obtenues depuis les views dans les class model, utili
 
 ### Emp.java
 ```java
-@App(url = "/add.etu", method = "post")
+@App(url = "/add.etu")
 public ModelView insert() {
     ModelView view = new ModelView("insert.jsp");
 
@@ -131,3 +142,43 @@ Dans notre exemple, l'url sera
 ```
 
 La valeur de `id` dans la methode details sera alors 2
+
+# Session
+## 1 - Protection
+Pour proteger vos methodes vous pouvez les annoter avec `@Auth(profile = "votreProfile")`.
+
+Ajouter la variable init-param dans votre web.xml pour identifer le nom de la variable session utiliser pour proteger les methodes ici on utiles isconnected
+
+```xml
+<init-param>
+    <param-name>sessionname</param-name>
+    <param-value>isconnected</param-value>
+</init-param>
+```
+Utiliser la methode addSession de ModelView pour ajouter l'utilisateur connecter
+
+```java
+@App(url = "/login.etu")
+public ModelView login(@Params(name = "nom") String nom) {
+    ModelView view = new ModelView("logged.jsp");
+    view.addSession("isconnected", nom);
+    // ...
+    return view;
+}
+```
+Les methodes sans annotations ou avec annotées `"public"` seront pas protegées.
+
+## 2- Ajout de variable de session dans HttpSession
+Vous pouvez utiliser la methode `addSession` de ModelView pour ajouter des variables de session qui seront directement stocker dans HttpSession.
+
+## 3- Utilisation des variables de session dans les methodes d'actions
+Vous pouvez creer dans votre modele une propriété `HashMap<String, Object> sessions` qui sera relié à `HttpSession`.
+Si vous rajouter des objets ils seront enregister dans `HttpSession` et vous pourrez utiliser aussi ces variables dans les methodes d'action.
+
+Annotez vos methodes avec `@Session()` pour les utiliser
+
+## 4- Suppression des variables de session
+
+Dans votre view vous avez la propriété `invalidateSession` de type boolean. Mettez le la valeur `true` pour supprimer toutes les variables de session.
+
+Pour supprimer une session spécifique, ajouter son nom à `deleteSession` de ModelView.
